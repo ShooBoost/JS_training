@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+    <div id="app" class="container pt-5">
+        <button @click="showModal('Add New Product', productsListInNowPage.length)" data-toggle="modal" data-target="#editModal" type="button"  class="btn btn-info mb-4 float-right">Add New</button>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">category</th>
+                    <th scope="col">title</th>
+                    <th scope="col">origin_price</th>
+                    <th scope="col">price</th>
+                    <th scope="col">enabled</th>
+                    <th scope="col">edit</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="(item, index) in productsListInNowPage"
+                    :key="item.id">
+                    <th scope="row">{{ index + 1 }}</th>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.origin_price }}</td>
+                    <td>{{ item.price }}</td>
+                    <td :class="{'text-info': item.enabled}">{{ item.enabled }}</td>
+                    <td>
+                        <div class="btn-group" role="group" aria-label="Basic example">
+                            <button @click="showModal('Edit Product', index)" data-toggle="modal" data-target="#editModal" type="button" class="btn btn-outline-info">Edit it</button>
+                            <button @click="showModal('Delete Product', index)" data-toggle="modal" data-target="#deleteModal"  type="button" class="btn btn-outline-danger">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="d-flex mb-5">
+            <my-pagination
+                class="mr-auto"
+                :total-pages="totalPages"
+                @letsgotopage = "getBackEndProducts">
+            </my-pagination>
+            <button class="btn btn-info" @click="logout">logout</button>
+        </div>
+        
+
+        <delete-modal :now-modal-mode="nowModalMode"
+                      :now-edit-product="nowEditProduct"
+                      :user="user"
+                      @confirmmodal="getBackEndProducts">
+        </delete-modal>
+
+        <edit-modal :now-modal-mode="nowModalMode"
+                    :now-edit-product="nowEditProduct"
+                    :user="user"
+                    @confirmmodal="getBackEndProducts">
+        </edit-modal>
+
+    </div>
+    <!-- del modal template 開始 -->
+    <script type="text/x-template" id="deleteModalTemplate">
+        <div class="modal fade" role="dialog" id="deleteModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">確定要刪除 {{nowEditProduct.title}} 嗎</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>按下確認刪除後， <span class="text-danger">{{nowEditProduct.title}} 將被永久刪除</span> </p>
+                        <img class="w-100" :src="nowEditProduct.imageUrl" :alt="nowEditProduct.title">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button @click="confirmModal(nowModalMode)" type="button" class="btn btn-danger" data-dismiss="modal" >Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <!-- del modal template 結束 -->
+    <!-- edit modal template 開始 -->
+    <script type="text/x-template" id="editModalTemplate">
+        <div>
+            <!-- class 記得加回 modal fade -->
+            <div class="modal fade" tabindex="-1" role="dialog" id="editModal" aria-labelledby="editModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-xl " role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 v-text="nowModalMode" class="modal-title" id="editModalLabel">編輯</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-row">
+                                            <div v-for="num in 5" 
+                                                v-if="nowEditProduct.imageUrl.length >= (num - 1)"
+                                                class="form-group col-12">
+                                                <label v-if="(num - 1) == 0"
+                                                    for="inputImgUrl">輸入圖片網址
+                                                </label>
+                                                <input v-model="nowEditProduct.imageUrl[num - 1]" type="text" class="form-control mb-4" id="inputImgUrl" placeholder="輸入圖片網址">
+                                                <img class="w-100" :src="nowEditProduct.imageUrl[num - 1]" alt="">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-row">
+                                            <div class="form-group col-12">
+                                                <label for="inputTitle">標題</label>
+                                                <input v-model="nowEditProduct.title" type="text" class="form-control" id="inputTitle" placeholder="Title">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="inputCategory">分類</label>
+                                                <input v-model="nowEditProduct.category" type="text" class="form-control" id="inputCategory" placeholder="Category" required="required">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="inputUnit">單位</label>
+                                                <input v-model="nowEditProduct.unit" type="text" class="form-control" id="inputUnit" placeholder="Unit">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="inputOriginPrice">原價</label>
+                                                <input v-model="nowEditProduct.origin_price" type="text" class="form-control" id="inputOriginPrice" placeholder="Origin Price">
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="inputPrice">售價</label>
+                                                <input v-model="nowEditProduct.price" type="text" class="form-control" id="inputPrice" placeholder="Price">
+                                            </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <hr>
+                                                <label for="inputDescription">產品描述</label>
+                                                <input v-model="nowEditProduct.description" type="text" class="form-control" id="inputDescription" placeholder="Description">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="inputContent">說明內容</label>
+                                                <input v-model="nowEditProduct.content" type="text" class="form-control" id="inputContent" placeholder="Content">
+                                            </div>
+                                            <div class="form-row">
+                                            <div class="form-check">
+                                                <input v-model="nowEditProduct.enabled" class="form-check-input" type="checkbox" id="checkboxEnabled">
+                                                <label class="form-check-label" for="checkboxEnabled">
+                                                是否上架
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button @click="confirmModal(nowModalMode)" type="button" class="btn btn-info" data-dismiss="modal">Save changes</button>
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </script>
+    <!-- edit modal template 結束 -->
+    <!-- pagination template 開始 -->
+    <script type="text/x-template" id="paginationTemplate">
+        <div>
+            <nav aria-label="Page navigation example">
+                <ul class="pagination">
+                    <li class="page-item"
+                        @click.prevent="goToPage('Previous')">
+                        <a class="page-link text-info" href="#">Previous</a>
+                    </li>
+                    <li v-for="pageNum in totalPages"
+                        @click.prevent="goToPage(pageNum)"
+                        class="page-item">
+                        <a class="page-link text-info" href="#">{{ pageNum }}</a>
+                    </li>
+                    <li class="page-item"
+                        @click.prevent="goToPage('Next')">
+                        <a class="page-link text-info" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </script>
+    <!-- pagination template 結束 -->
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="week4.js"></script>
+</body>
+</html>
