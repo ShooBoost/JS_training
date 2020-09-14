@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vue-loading-overlay@3.4.0/dist/vue-loading.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <loading :active.sync="isLoading"></loading>
+        <!-- navbar 開始 -->
+        <div class="container py-4 fixed-top bg-white">
+            <a class="material-icons text-secondary text-decoration-none" href="cartAndCheck.html">
+                shopping_cart
+            </a>
+            <span>{{cartList.length}}</span>
+        </div>
+        <!-- navbar 結束 -->
+        <!-- banner 開始 -->
+        <!-- banner 結束 -->
+        <!-- products List 開始 -->
+        <div class="container mt-5 pt-5">
+            
+            <ul class="row list-unstyled">
+                <li class="col col-3 btn-hoverShow"
+                    v-for="product in productsList"
+                    >
+                    <img class="w-100 mb-4"
+                         :src="product.imageUrl[0]"
+                         :alt="product.title"
+                         >
+                    <h5 class="letter-spacing-1px text-center h6 text-black-50">{{ product.title }}</h5>
+                    <p class="letter-spacing-1px text-center text-black-50">{{ product.price }}NTD/{{product.unit}}</p>
+                    <button class="btn btn-secondary mb-5 w-100"
+                            @click="addToCart(product.id)">Add To Cart</button>
+                </li>
+            </ul>
+        </div>
+        <!-- products List 結束 -->
+    </div>
+    <!-- axios cdn 開始 -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- axios cdn 結束 -->
+    <!-- vueLoading 開始 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-loading-overlay@3.4.0/dist/vue-loading.min.js"></script>
+    <!-- vueLoading 結束 -->
+    <!-- 自製 js 開始 -->
+    <script type="module" src="js/all.js"></script>
+    <!-- 自製 js 結束 -->
+    <!-- bootstrap js cdn 開始 -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
+    <!-- bootstrap js cdn 結束 -->
+</body>
+</html>
